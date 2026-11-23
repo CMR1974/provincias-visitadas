@@ -1,0 +1,25 @@
+
+name: Mantener Supabase activo
+
+on:
+  schedule:
+    - cron: '17 9 */5 * *'
+  workflow_dispatch:
+
+jobs:
+  comprobar-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          test -n "$SUPABASE_URL"
+          test -n "$SUPABASE_KEY"
+          curl --fail --show-error --silent \
+            --retry 2 \
+            --max-time 30 \
+            -H "apikey: $SUPABASE_KEY" \
+            "$SUPABASE_URL/rest/v1/visits?select=territory&limit=1" \
+            > /dev/null
